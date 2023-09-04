@@ -317,7 +317,7 @@ class MarketDataService:
         self.link = 'https://invest-public-api.tinkoff.ru/rest/tinkoff.public.invest.api.contract.v1.MarketDataService/'
 
 
-    def get_candles(self, instrument_id:str, interval:int=13):
+    def get_candles(self, from_:str = None, instrument_id:str, interval:int=13):
         '''
 
         interval::https://tinkoff.github.io/investAPI/marketdata/#candleinterval
@@ -333,22 +333,32 @@ class MarketDataService:
         # пока не получим пустые свечи или ошибку выдачи
         # в каждой новой итерации меняется от и до местами,
         # а от - максимальный интервальный промежуток для текущего интервала
-        
-        json = {
-            "from": return_now_datetime(jump_back_to=interval),
-            "to": return_now_datetime(),
-            "interval": interval,
-            "instrument_id": instrument_id,
-        }
 
-        results = requests.post(
-            self.link + 'GetCandles',
-            headers = par,
-            json = json,
-            timeout=10
-            )
-        
-        print(f"candles for {json['instrument_id']} from {json['from']} to {json['to']}")
+        date_from = return_now_datetime(jump_back_to=interval)
+        date_to = return_now_datetime()
 
-        return results.json()
+        if not from_:
+        
+            json = {
+                "from": date_from,
+                "to": date_to,
+                "interval": interval,
+                "instrument_id": instrument_id,
+            }
+
+            results = requests.post(
+                self.link + 'GetCandles',
+                headers = par,
+                json = json,
+                timeout=10
+                )
+        
+            print(f"candles for {json['instrument_id']} from {json['from']} to {json['to']}")
+
+            return results.json()
+        
+        else:
+            
+
+
     
