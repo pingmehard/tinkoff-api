@@ -325,30 +325,9 @@ class MarketDataService:
         instrument_id::ID of instrument, for example FIGI
         
         '''
-
-        if not from_:
-        
-            json = {
-                "from": return_datetime_delta(interval=interval),
-                "to": return_datetime_delta(timestamp=to),
-                "interval": interval,
-                "instrument_id": instrument_id,
-            }
-
-            results = requests.post(
-                self.link + 'GetCandles',
-                headers = par,
-                json = json,
-                timeout = 10
-                )
-        
-            print(f"Candles for {json['instrument_id']} from {json['from']} to {json['to']}")
-
-            return results.json()['candles']
-
         # starting implementation of while function for all dates loading
         date_to = return_datetime_delta(timestamp=to)
-        date_from = return_datetime_delta(timestamp=date_to, interval=interval)
+        date_from = return_datetime_delta(interval=interval) if not from_ else return_datetime_delta(timestamp=date_to, interval=interval)
 
         candles = []
         while True:
