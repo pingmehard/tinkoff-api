@@ -345,8 +345,7 @@ class MarketDataService:
 
             return results.json()['candles']
 
-        ### test here start
-
+        # starting implementation of while function for all dates loading
         date_to = return_datetime_delta(timestamp=to)
         date_from = return_datetime_delta(timestamp=date_to, interval=interval)
 
@@ -372,7 +371,7 @@ class MarketDataService:
             try:
                 formatted_results = results.json()['candles']
             except ValueError:
-                # sleep before api unban for us loading too much candles
+                # sleep till api unban us for loading too much candles
                 x_ratelimit_reset = results.headers['x-ratelimit-reset']
                 print(f"Sleep...for {x_ratelimit_reset} secs")
                 time.sleep(int(x_ratelimit_reset)+1)
@@ -392,8 +391,6 @@ class MarketDataService:
                 # exit if we out of from_ date
                 if  temp_date_from_datetime_format < date_from_datetime_format:
                     return candles
-                # with open("test.txt", 'w') as f:
-                #     f.write(str(candles))
             else:
                 print(f"Candles for {json['instrument_id']} from {from_} to now")
                 if not candles:
@@ -403,7 +400,3 @@ class MarketDataService:
             
             date_to = date_from
             date_from = return_datetime_delta(timestamp=date_to, interval=interval)
-
-        ### test here end
-
-    
