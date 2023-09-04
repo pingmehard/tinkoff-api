@@ -21,7 +21,7 @@ par = {
 }
 
 
-def return_now_datetime(jump_back_to:int = None):
+def return_now_datetime(timestamp:str = None, jump_back_to:int = None):
     '''
     Return nowdatetime with tinkoff api datetime format string.
 
@@ -29,17 +29,23 @@ def return_now_datetime(jump_back_to:int = None):
     It is acceptable for getting "from" date for candles. https://tinkoff.github.io/investAPI/marketdata/#candleinterval
     '''
 
+    # return now datetime in tinkoff api format
     if not jump_back_to:
         return datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
+    # this is mapping for maximum tinkoff intervals due to candles frequency
     jump_mapping = {
         1: datetime.timedelta(days=1),
-        4: relativedelta(weeks=1) - relativedelta(days=1),
+        4: relativedelta(weeks=1) - relativedelta(hours=1),
         5: relativedelta(years=1) - relativedelta(days=1),
-        13: relativedelta(years=10) - relativedelta(days=1),
+        13: relativedelta(years=10) - relativedelta(months=1),
     }
 
-    now = datetime.datetime.now() - jump_mapping[jump_back_to]
+    if not timestamp:
+        now = datetime.datetime.now() - jump_mapping[jump_back_to]
+    else:
+        now = datetime.datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%fZ") - jump_mapping[jump_back_to]
+
     return now.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
