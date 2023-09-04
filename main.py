@@ -364,9 +364,11 @@ class MarketDataService:
             candles = []
             while True:
 
+                print(f"Downloading from {date_from} to {date_to}")
+
                 json = {
-                    "from": return_datetime_delta(timestamp=from_, interval=interval),
-                    "to": from_,
+                    "from": date_from,
+                    "to": date_to,
                     "interval": interval,
                     "instrument_id": instrument_id,
                 }
@@ -375,7 +377,7 @@ class MarketDataService:
                     self.link + 'GetCandles',
                     headers = par,
                     json = json,
-                    timeout=10
+                    timeout=60
                     )
                 
                 try:
@@ -394,8 +396,10 @@ class MarketDataService:
 
                 if formatted_results:
                     candles += formatted_results
+                    with open("test.txt", 'w') as f:
+                        f.write(str(candles))
                 else:
-                    print(f"Candles for {json['instrument_id']} from {json['from']} to {json['to']}")
+                    print(f"Candles for {json['instrument_id']} from {from_} to now")
                     if not candles:
                         print("There is no data for stated period.")
                         return None
