@@ -347,7 +347,7 @@ class MarketDataService:
                 self.link + 'GetCandles',
                 headers = par,
                 json = json,
-                timeout=10
+                timeout = 10
                 )
         
             print(f"Candles for {json['instrument_id']} from {json['from']} to {json['to']}")
@@ -356,7 +356,7 @@ class MarketDataService:
 
         ### test here start
 
-        date_to = return_datetime_delta()
+        date_to = return_datetime_delta(timestamp=to)
         date_from = return_datetime_delta(timestamp=date_to, interval=interval)
 
         candles = []
