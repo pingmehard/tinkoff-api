@@ -3,7 +3,7 @@ import datetime
 import time
 import sys
 
-from utils import return_now_datetime
+from utils import return_datetime_delta
 from utils import return_currency
 
 
@@ -317,7 +317,7 @@ class MarketDataService:
         self.link = 'https://invest-public-api.tinkoff.ru/rest/tinkoff.public.invest.api.contract.v1.MarketDataService/'
 
 
-    def get_candles(self, from_:str = None, instrument_id:str, interval:int=13):
+    def get_candles(self, instrument_id:str, from_:str = None, interval:int = 13):
         '''
 
         interval::https://tinkoff.github.io/investAPI/marketdata/#candleinterval
@@ -359,6 +359,22 @@ class MarketDataService:
         
         else:
             
+            json = {
+                "from": date_from,
+                "to": return_now_datetime(datetime=date_from),
+                "interval": interval,
+                "instrument_id": instrument_id,
+            }
 
+            results = requests.post(
+                self.link + 'GetCandles',
+                headers = par,
+                json = json,
+                timeout=10
+                )
+        
+            print(f"candles for {json['instrument_id']} from {json['from']} to {json['to']}")
+
+            return results.json()
 
     
