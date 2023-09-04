@@ -378,10 +378,19 @@ class MarketDataService:
                     timeout=10
                     )
                 
-                formatted_results = results.json()['candles']
+                try:
+                    formatted_results = results.json()['candles']
+                except ValueError:
+                    # sleep before api unban for us loading too much candles
+                    time.sleep(int(results.headers['x-ratelimit-reset']))
+                except Exception as exception:
+                    print()
+                    print(results)
+                    print(results.json())
+                    print(exception)
 
                 if formatted_results:
-                    candles += results.json()['candles']
+                    candles += formatted_results
                 else:
                     print(f"Candles for {json['instrument_id']} from {json['from']} to {json['to']}")
                     if not candles:
@@ -391,7 +400,7 @@ class MarketDataService:
                 
                 date_to = date_from
                 date_from = return_datetime_delta(timestamp=date_to, interval=interval)
-                
+
             ### test here end
 
     
