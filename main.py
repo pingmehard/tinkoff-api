@@ -350,36 +350,48 @@ class MarketDataService:
                 timeout=10
                 )
         
-            print(f"candles for {json['instrument_id']} from {json['from']} to {json['to']}")
+            print(f"Candles for {json['instrument_id']} from {json['from']} to {json['to']}")
 
-            return results.json()
+            return results.json()['candles']
         
         else:
 
             ### test here start
-            
-            json = {
-                "from": return_datetime_delta(timestamp=from_, interval=interval),
-                "to": from_,
-                "interval": interval,
-                "instrument_id": instrument_id,
-            }
 
-            results = requests.post(
-                self.link + 'GetCandles',
-                headers = par,
-                json = json,
-                timeout=10
-                )
-        
-            print(f"candles for {json['instrument_id']} from {json['from']} to {json['to']}")
+            date_to = return_datetime_delta()
+            date_from = return_datetime_delta(timestamp=date_to, interval=interval)
 
-            if results.json()['candles']:
-                return results.json()
-            else:
-                print("There is no data for stated period.")
-                return None
-        
+            candles = []
+            while True:
+
+                json = {
+                    "from": return_datetime_delta(timestamp=from_, interval=interval),
+                    "to": from_,
+                    "interval": interval,
+                    "instrument_id": instrument_id,
+                }
+
+                results = requests.post(
+                    self.link + 'GetCandles',
+                    headers = par,
+                    json = json,
+                    timeout=10
+                    )
+                
+                formatted_results = results.json()['candles']
+
+                if formatted_results:
+                    candles += results.json()['candles']
+                else:
+                    print(f"Candles for {json['instrument_id']} from {json['from']} to {json['to']}")
+                    if not candles:
+                        print("There is no data for stated period.")
+                        return None
+                    return candles
+                
+                date_to = date_from
+                date_from = return_datetime_delta(timestamp=date_to, interval=interval)
+                
             ### test here end
 
     
