@@ -34,6 +34,7 @@ def return_now_datetime(jump_back_to:int = None):
 
     jump_mapping = {
         1: datetime.timedelta(days=1),
+        4: relativedelta(weeks=1) - relativedelta(days=1),
         5: relativedelta(years=1) - relativedelta(days=1),
         13: relativedelta(years=10) - relativedelta(days=1),
     }
