@@ -317,7 +317,7 @@ class MarketDataService:
         self.link = 'https://invest-public-api.tinkoff.ru/rest/tinkoff.public.invest.api.contract.v1.MarketDataService/'
 
 
-    def get_candles(self, instrument_id:str, from_:str = None, interval:int = 13):
+    def get_candles(self, instrument_id:str, from_:str = None, to:str = None, interval:int = 13):
         '''
 
         interval::https://tinkoff.github.io/investAPI/marketdata/#candleinterval
@@ -338,7 +338,7 @@ class MarketDataService:
         
             json = {
                 "from": return_datetime_delta(interval=interval),
-                "to": return_datetime_delta(),
+                "to": return_datetime_delta(timestamp=to),
                 "interval": interval,
                 "instrument_id": instrument_id,
             }
@@ -353,61 +353,66 @@ class MarketDataService:
             print(f"Candles for {json['instrument_id']} from {json['from']} to {json['to']}")
 
             return results.json()['candles']
-        
-        else:
 
-            ### test here start
+        ### test here start
 
-            date_to = return_datetime_delta()
+        date_to = return_datetime_delta()
+        date_from = return_datetime_delta(timestamp=date_to, interval=interval)
+
+        candles = []
+        while True:
+
+            print(f"Downloading from {date_from} to {date_to}")
+
+            json = {
+                "from": date_from,
+                "to": date_to,
+                "interval": interval,
+                "instrument_id": instrument_id,
+            }
+
+            results = requests.post(
+                self.link + 'GetCandles',
+                headers = par,
+                json = json,
+                timeout=60
+                )
+            
+            try:
+                formatted_results = results.json()['candles']
+            except ValueError:
+                # sleep before api unban for us loading too much candles
+                x_ratelimit_reset = results.headers['x-ratelimit-reset']
+                print(f"Sleep...for {x_ratelimit_reset} secs")
+                time.sleep(int(x_ratelimit_reset)+1)
+                continue
+            except Exception as exception:
+                print()
+                print(results)
+                print(results.json())
+                print(exception)
+
+            # compare from dates for exit after out of bonds
+            temp_date_from_datetime_format = datetime.datetime.strptime(date_from, "%Y-%m-%dT%H:%M:%S.%fZ")
+            date_from_datetime_format = datetime.datetime.strptime(from_, "%Y-%m-%dT%H:%M:%S.%fZ")
+
+            if formatted_results:
+                candles += formatted_results
+                # exit if we out of from_ date
+                if  temp_date_from_datetime_format < date_from_datetime_format:
+                    return candles
+                # with open("test.txt", 'w') as f:
+                #     f.write(str(candles))
+            else:
+                print(f"Candles for {json['instrument_id']} from {from_} to now")
+                if not candles:
+                    print("There is no data for stated period.")
+                    return None
+                return candles
+            
+            date_to = date_from
             date_from = return_datetime_delta(timestamp=date_to, interval=interval)
 
-            candles = []
-            while True:
-
-                print(f"Downloading from {date_from} to {date_to}")
-
-                json = {
-                    "from": date_from,
-                    "to": date_to,
-                    "interval": interval,
-                    "instrument_id": instrument_id,
-                }
-
-                results = requests.post(
-                    self.link + 'GetCandles',
-                    headers = par,
-                    json = json,
-                    timeout=60
-                    )
-                
-                try:
-                    formatted_results = results.json()['candles']
-                except ValueError:
-                    # sleep before api unban for us loading too much candles
-                    x_ratelimit_reset = results.headers['x-ratelimit-reset']
-                    print(f"Sleep...for {x_ratelimit_reset} secs")
-                    time.sleep(int(x_ratelimit_reset)+1)
-                    continue
-                except Exception as exception:
-                    print()
-                    print(results)
-                    print(results.json())
-                    print(exception)
-
-                if formatted_results:
-                    candles += formatted_results
-                    with open("test.txt", 'w') as f:
-                        f.write(str(candles))
-                else:
-                    print(f"Candles for {json['instrument_id']} from {from_} to now")
-                    if not candles:
-                        print("There is no data for stated period.")
-                        return None
-                    return candles
-                
-                date_to = date_from
-                date_from = return_datetime_delta(timestamp=date_to, interval=interval)
-
-            ### test here end
+        ### test here end
 
     
