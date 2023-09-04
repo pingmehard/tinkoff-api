@@ -38,6 +38,8 @@ def return_datetime_delta(timestamp:str = None, interval:int = None):
     # this is mapping for maximum tinkoff intervals due to candles frequency
     jump_mapping = {
         1: datetime.timedelta(days=1),
+        2: relativedelta(days=1) - relativedelta(minutes=5),
+        3: relativedelta(days=1) - relativedelta(minutes=15),
         4: relativedelta(weeks=1) - relativedelta(hours=1),
         5: relativedelta(years=1) - relativedelta(days=1),
         13: relativedelta(years=10) - relativedelta(months=1),

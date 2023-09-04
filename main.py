@@ -319,7 +319,8 @@ class MarketDataService:
 
     def get_candles(self, instrument_id:str, from_:str = None, to:str = None, interval:int = 13):
         '''
-
+        from_::datetime format, for example "2023-05-01T10:27:59.733658Z"
+        to::datetime format, for example "2023-05-01T10:27:59.733658Z". if left empty, then till now
         interval::https://tinkoff.github.io/investAPI/marketdata/#candleinterval
         instrument_id::ID of instrument, for example FIGI
         
