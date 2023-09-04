@@ -52,7 +52,7 @@ class UsersService:
 
 class OperationsService:
 
-    def get_broker_report(self, accountId, from_ = '', to = return_now_datetime()):
+    def get_broker_report(self, accountId, from_ = '', to = return_datetime_delta()):
         '''
         Generate Broker report with all details of your operations and portfolio for a period. By default it is 30 days. Define "to" datetime and it calculates "to" datetime - 30 days.
         "30 days" is a default lambda of this method.
@@ -144,7 +144,7 @@ class OperationsService:
 
         return brokerReport
 
-    def get_operations(self, accountId, figi, state = "ALL", from_ = "1970-01-01T01:00:00.000Z", to = return_now_datetime()): 
+    def get_operations(self, accountId, figi, state = "ALL", from_ = "1970-01-01T01:00:00.000Z", to = return_datetime_delta()): 
         
         '''
         accountId - Id of accounts in tinkoff.Investments. UsersService.get_account method returns a json with accountId.
@@ -259,7 +259,7 @@ class OperationsService:
 
 class InstrumentsService:
 
-    def get_dividends(self, figi, from_ = "1970-01-01T01:00:00.000Z", to = return_now_datetime()):
+    def get_dividends(self, figi, from_ = "1970-01-01T01:00:00.000Z", to = return_datetime_delta()):
         '''
         Get dividends information from Tinkoff.Investments. Contains list of jsons for earch dividentd payment. Future divs are included.
         Expects figi (for example from get_portfolio_positions method), from and to. 
@@ -334,14 +334,11 @@ class MarketDataService:
         # в каждой новой итерации меняется от и до местами,
         # а от - максимальный интервальный промежуток для текущего интервала
 
-        date_from = return_now_datetime(jump_back_to=interval)
-        date_to = return_now_datetime()
-
         if not from_:
         
             json = {
-                "from": date_from,
-                "to": date_to,
+                "from": return_datetime_delta(interval=interval),
+                "to": return_datetime_delta(),
                 "interval": interval,
                 "instrument_id": instrument_id,
             }
@@ -358,10 +355,12 @@ class MarketDataService:
             return results.json()
         
         else:
+
+            ### test here start
             
             json = {
-                "from": date_from,
-                "to": return_now_datetime(datetime=date_from),
+                "from": return_datetime_delta(timestamp=from_, interval=interval),
+                "to": from_,
                 "interval": interval,
                 "instrument_id": instrument_id,
             }
@@ -375,6 +374,12 @@ class MarketDataService:
         
             print(f"candles for {json['instrument_id']} from {json['from']} to {json['to']}")
 
-            return results.json()
+            if results.json()['candles']:
+                return results.json()
+            else:
+                print("There is no data for stated period.")
+                return None
+        
+            ### test here end
 
     
