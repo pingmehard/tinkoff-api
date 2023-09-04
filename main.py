@@ -382,7 +382,10 @@ class MarketDataService:
                     formatted_results = results.json()['candles']
                 except ValueError:
                     # sleep before api unban for us loading too much candles
-                    time.sleep(int(results.headers['x-ratelimit-reset']))
+                    x_ratelimit_reset = results.headers['x-ratelimit-reset']
+                    print(f"Sleep...for {x_ratelimit_reset} secs")
+                    time.sleep(int(x_ratelimit_reset)+1)
+                    continue
                 except Exception as exception:
                     print()
                     print(results)
