@@ -386,17 +386,13 @@ class MarketDataService:
             temp_date_from_datetime_format = datetime.datetime.strptime(date_from, "%Y-%m-%dT%H:%M:%S.%fZ")
             date_from_datetime_format = datetime.datetime.strptime(from_, "%Y-%m-%dT%H:%M:%S.%fZ")
 
+
             if formatted_results:
                 candles += formatted_results
                 # exit if we out of from_ date
-                if  temp_date_from_datetime_format < date_from_datetime_format:
-                    return candles
-            else:
-                print(f"Candles for {json['instrument_id']} from {from_} to now")
-                if not candles:
-                    print("There is no data for stated period.")
-                    return None
+            if temp_date_from_datetime_format < date_from_datetime_format:
+                print(f"Candles for {json['instrument_id']} from {from_} to {to}")
                 return candles
-            
+
             date_to = date_from
             date_from = return_datetime_delta(timestamp=date_to, interval=interval)
